@@ -3,6 +3,8 @@ numpy==1.23.5
 seaborn==0.12.2
 matplotlib==3.7.1
 scikit-learn==1.3.0
+imblearn
+statsmodels
 catboost==1.2
 xgboost
 dill
