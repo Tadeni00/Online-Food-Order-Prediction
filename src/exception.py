@@ -2,8 +2,6 @@ import sys
 import logging
 import os
 from datetime import datetime
-from src.logger import logging
-
 
 # Setup logging
 LOG_FILE = f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"
@@ -18,12 +16,28 @@ logging.basicConfig(
 )
 
 def error_message_detail(error, error_detail: sys):
+    """
+    Function to capture error details including script name, line number, and error message.
+
+    Parameters:
+    - error: Exception object containing the error message.
+    - error_detail: sys module to capture error details using sys.exc_info().
+
+    Returns:
+    - error_message: Formatted error message string.
+    """
     _, _, exc_tb = error_detail.exc_info()
     file_name = exc_tb.tb_frame.f_code.co_filename
     error_message = f"Error occurred in python script name [{file_name}] line number [{exc_tb.tb_lineno}] error message [{str(error)}]"
     return error_message
 
 class CustomException(Exception):
+    """
+    Custom exception class for handling exceptions and logging detailed error messages.
+
+    Attributes:
+    - error_message_detail: Formatted error message with script name, line number, and error message.
+    """
     def __init__(self, error_message, error_detail: sys):
         super().__init__(error_message)
         self.error_message_detail = error_message_detail(error_message, error_detail)

@@ -12,9 +12,12 @@ os.makedirs(log_dir, exist_ok=True)
 LOG_FILE = f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"
 LOG_FILE_PATH = os.path.join(log_dir, LOG_FILE)
 
+# Configure logging to log both to a file and to the console
 logging.basicConfig(
-    filename=LOG_FILE_PATH,
-    format="[%(asctime)s] %(lineno)d %(name)s - %(message)s",
     level=logging.INFO,
+    format="[%(asctime)s] %(lineno)d %(name)s - %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILE_PATH),
+        logging.StreamHandler()
+    ]
 )
-
