@@ -1,32 +1,19 @@
 import os
 import sys
-import dill
+import joblib  # Use joblib instead of dill
 from src.exception import CustomException
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 def save_object(file_path, obj):
     '''
-    Save an object to a file using dill.
-    
-    Parameters:
-    - file_path (str): Path where the object will be saved.
-    - obj: The object to be saved.
-    
-    Raises:
-    - CustomException: If there's an error during the saving process.
+    Save an object to a file using joblib.
     '''
     try:
         dir_path = os.path.dirname(file_path)
-        
-        # Ensure the directory exists
         os.makedirs(dir_path, exist_ok=True)
-        
-        # Save the object to a file
-        with open(file_path, 'wb') as file_obj:
-            dill.dump(obj, file_obj)
-    
+        joblib.dump(obj, file_path)  # Save the object using joblib
+        print(f"Model saved to {file_path}.")
     except Exception as e:
-        # Raise a custom exception if an error occurs
         raise CustomException(e, sys)
 
 def evaluate_models(X_train, y_train, X_test, y_test, models):
@@ -76,25 +63,11 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
 
 def load_object(file_path):
     '''
-    Load an object from a file using dill.
-    
-    Parameters:
-    - file_path (str): Path to the file where the object is saved.
-    
-    Returns:
-    - The object loaded from the file.
-    
-    Raises:
-    - CustomException: If there's an error during loading.
+    Load an object from a file using joblib.
     '''
     try:
-        # Load the object from the pickle file
-        with open(file_path, 'rb') as file_obj:
-            obj = dill.load(file_obj)
-    
+        obj = joblib.load(file_path)  # Load the object using joblib
+        print(f"Type of loaded object: {type(obj)}")
+        return obj
     except Exception as e:
-        # Raise a custom exception if an error occurs
         raise CustomException(e, sys)
-
-    print(f"Type of loaded object: {type(obj)}")
-    return obj

@@ -1,6 +1,6 @@
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, RobustScaler
+from sklearn.preprocessing import OneHotEncoder, RobustScaler, LabelEncoder
 from sklearn.pipeline import Pipeline
 from imblearn.combine import SMOTETomek
 import joblib
@@ -78,6 +78,11 @@ class DataTransformation:
             input_feature_test_df = test_df.drop(columns=[target_column_name], axis=1)
             target_feature_test_df = test_df[target_column_name]
 
+            # Encode target variable
+            label_encoder = LabelEncoder()
+            target_feature_train_df = label_encoder.fit_transform(target_feature_train_df)
+            target_feature_test_df = label_encoder.transform(target_feature_test_df)
+
             logging.info("Applying preprocessing object on training and testing dataframes.")
 
             input_feature_train_arr = preprocessor_obj.fit_transform(input_feature_train_df)
@@ -105,6 +110,7 @@ class DataTransformation:
 
         except Exception as e:
             raise CustomException(e, sys)
+
 
     def save_object(self, file_path, obj):
         try:

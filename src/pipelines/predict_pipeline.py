@@ -5,6 +5,7 @@ import joblib
 from src.utils import load_object
 from src.exception import CustomException
 from dataclasses import dataclass
+from catboost import CatBoostClassifier
 from sklearn.pipeline import Pipeline
 
 model_path = os.path.join("artifacts", "model.pkl")
@@ -48,8 +49,8 @@ class PredictionPipeline:
     def load_model(self):
         try:
             model = joblib.load(model_path)
-            if not isinstance(model, Pipeline):
-                raise ValueError("Loaded object is not a valid scikit-learn Pipeline.")
+            if not isinstance(model, CatBoostClassifier):
+                raise ValueError("Loaded object is not a CatBoostClassifie.")
             return model
         except Exception as e:
             raise CustomException(e, sys)
@@ -61,32 +62,18 @@ class PredictionPipeline:
         except Exception as e:
             raise CustomException(e, sys)
 
+
     def predict(self, input_df):
         try:
+
+
+            # Preprocess the data
             input_features = self.preprocessor.transform(input_df)
+
+            # Make predictions
             predictions = self.model.predict(input_features)
             return predictions
+
         except Exception as e:
             raise CustomException(e, sys)
-
-# Example usage:
-# data = CustomData(
-#     Gender='female',
-#     Marital Status='Single',
-#     Occupation='engineer',
-#     Educational Qualifications='bachelor',
-#     Feedback='positive',
-#     Age=30,
-#     Monthly Income=5000.0,
-#     Family size=3,
-#     latitude=40.7128,
-#     longitude=-74.0060,
-#     Pin Code=10001
-# )
-#
-# input_df = data.get_data_as_dataframe()
-#
-# pipeline = PredictionPipeline()
-# predictions = pipeline.predict(input_df)
-# print(predictions)
 

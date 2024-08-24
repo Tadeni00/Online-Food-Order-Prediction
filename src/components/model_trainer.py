@@ -1,9 +1,13 @@
 import os
 import sys
+import mypy
 from dataclasses import dataclass
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
+
+
 from catboost import CatBoostClassifier
 from sklearn.ensemble import (
     AdaBoostClassifier,
@@ -15,7 +19,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
-# from xgboost import XGBClassifier
+from xgboost import XGBClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from lightgbm import LGBMClassifier
@@ -24,10 +28,13 @@ from sklearn.neural_network import MLPClassifier
 from src.exception import CustomException
 from src.logger import logging
 from src.utils import save_object
+from src.utils import load_object
+
+
 
 @dataclass
 class ModelTrainerConfig:
-    trained_model_file_path: str = os.path.join("artifacts", "model.pkl")
+    trained_model_file_path = os.path.join("artifacts", "model.pkl")
 
 class ModelTrainer:
     def __init__(self):
@@ -37,11 +44,10 @@ class ModelTrainer:
         try:
             logging.info("Splitting training and test input data")
             
-            # Unpacking the training and testing arrays into features and target variables
-            X_train = train_array[:, :-1]  # Features for training
-            y_train = train_array[:, -1]   # Target variable for training
-            X_test = test_array[:, :-1]    # Features for testing
-            y_test = test_array[:, -1]     # Target variable for testing
+            X_train = train_array[:, :-1]
+            y_train = train_array[:, -1]
+            X_test = test_array[:, :-1]
+            y_test = test_array[:, -1]
 
             logging.info("Defining models and preprocessing steps")
             
@@ -55,7 +61,7 @@ class ModelTrainer:
                 "SVC": SVC(probability=True),
                 "K-Neighbors": KNeighborsClassifier(),
                 "Naive Bayes": GaussianNB(),
-                # "XGBoost": XGBClassifier(),
+                "XGBoost": XGBClassifier(),
                 "CatBoost": CatBoostClassifier(verbose=False),
                 "LightGBM": LGBMClassifier(),
                 "LDA": LinearDiscriminantAnalysis(),
@@ -76,9 +82,9 @@ class ModelTrainer:
                 y_pred = model.predict(X_test)
                 
                 accuracy = accuracy_score(y_test, y_pred)
-                precision = precision_score(y_test, y_pred, average='binary')  # Adjust if necessary
-                recall = recall_score(y_test, y_pred, average='binary')        # Adjust if necessary
-                f1 = f1_score(y_test, y_pred, average='binary')                # Adjust if necessary
+                precision = precision_score(y_test, y_pred)
+                recall = recall_score(y_test, y_pred)
+                f1 = f1_score(y_test, y_pred)
 
                 logging.info(f"Model performance for {model_name}")
                 logging.info(f"- Accuracy: {accuracy:.4f}")
@@ -103,12 +109,14 @@ class ModelTrainer:
             if best_model_score < 0.6:
                 raise CustomException("No best model found with sufficient score")
 
-            # logging.info(f"Best model found: {best_model_name} with F1 score {best_model_score:.4f}")
             logging.info(f"Best model: {best_model_name}")
             logging.info(f"Accuracy: {best_model_accuracy:.4f}")
             logging.info(f"Precision: {best_model_precision:.4f}")
             logging.info(f"Recall: {best_model_recall:.4f}")
             logging.info(f"F1 score: {best_model_score:.4f}")
+
+            # Check type of model before saving
+            logging.info(f"Type of model before saving: {type(best_model)}")
 
             logging.info(f"Saving model to {self.model_trainer_config.trained_model_file_path}")
             try:
@@ -121,6 +129,10 @@ class ModelTrainer:
                 logging.error("Failed to save the model.")
                 raise CustomException(e, sys)
 
+            # Check type of model after loading
+            loaded_model = load_object(self.model_trainer_config.trained_model_file_path)
+            logging.info(f"Type of loaded model: {type(loaded_model)}")
+
             return best_model, best_model_score, best_model_accuracy, best_model_precision, best_model_recall
 
         except ValueError as e:
@@ -129,4 +141,3 @@ class ModelTrainer:
         except Exception as e:
             logging.error("Exception encountered while training the model")
             raise CustomException(e, sys)
-

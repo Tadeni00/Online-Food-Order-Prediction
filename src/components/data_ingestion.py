@@ -21,7 +21,7 @@ from src.exception import CustomException
 from src.logger import logging
 from src.components.data_transformation import DataTransformation
 from src.components.model_trainer import ModelTrainer
-
+from src.components.data_validation import DataValidation
 @dataclass
 class DataIngestionConfig:
     train_data_path: str = os.path.join('artifacts', "train.csv")
@@ -35,8 +35,22 @@ class DataIngestion:
     def initiate_data_ingestion(self):
         logging.info("Entered the data ingestion method or component")
         try:
-            df = pd.read_csv(r'C:\Users\HP\OneDrive\Documents\GitHub\Online-Food-Order-Prediction\notebook\food_order.csv')
+            df = pd.read_csv('https://raw.githubusercontent.com/amankharwal/Website-data/master/onlinefoods.csv')
             logging.info('Read the dataset as dataframe')
+
+            # Replace specific income ranges with numeric values in the 'Monthly Income' column
+            df['Monthly Income'] = df['Monthly Income'].replace(
+                ['No Income', 'Below Rs.10000', 'More than 50000', '10001 to 25000', '25001 to 50000'],
+                [0, 10000, 50000, 25000, 49999]
+            )
+            # Convert 'Monthly Income' to numeric type
+            df['Monthly Income'] = pd.to_numeric(df['Monthly Income'])
+
+            # Perform data validation
+            data_validation = DataValidation(train_path="", test_path="")
+            data_validation.validate_data_format(df)
+            data_validation.validate_missing_values(df)
+            data_validation.validate_business_logic(df)
 
             os.makedirs(os.path.dirname(self.ingestion_config.train_data_path), exist_ok=True)
 
@@ -66,7 +80,7 @@ if __name__ == "__main__":
         train_arr, test_arr, _ = data_transformation.initiate_data_transformation(train_data, test_data)
 
         model_trainer = ModelTrainer()
-        best_model, f1, accuracy, precision, recall  = model_trainer.initiate_model_trainer(train_arr, test_arr)
+        best_model, f1, accuracy, precision, recall = model_trainer.initiate_model_trainer(train_arr, test_arr)
 
         print(f"Best model: {best_model}")
         print(f"Accuracy: {accuracy}")
