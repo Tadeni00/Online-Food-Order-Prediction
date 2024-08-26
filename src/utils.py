@@ -1,6 +1,6 @@
 import os
 import sys
-import joblib  # Use joblib instead of dill
+import joblib
 from src.exception import CustomException
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
@@ -11,7 +11,7 @@ def save_object(file_path, obj):
     try:
         dir_path = os.path.dirname(file_path)
         os.makedirs(dir_path, exist_ok=True)
-        joblib.dump(obj, file_path)  # Save the object using joblib
+        joblib.dump(obj, file_path)
         print(f"Model saved to {file_path}.")
     except Exception as e:
         raise CustomException(e, sys)

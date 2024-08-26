@@ -68,7 +68,7 @@ class DataTransformation:
             logging.info('Read train and test data completed')
 
             logging.info('Obtaining preprocessing object')
-            preprocessor_obj = self.get_data_transformer_object(train_df)  # Pass train_df to get_data_transformer_object()
+            preprocessor_obj = self.get_data_transformer_object(train_df)
 
             target_column_name = 'Output'
 
